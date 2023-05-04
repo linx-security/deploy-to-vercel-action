@@ -82,7 +82,7 @@ const init = () => {
 			const artifactClient = artifact.create()
 			core.info('Restoring artifacts...')
 			const downloads = await artifactClient.downloadAllArtifacts(PREBUILT_CACHE_KEY)
-
+			core.info(JSON.stringify(downloads || {}))
 			if (!downloads || downloads.length > 0) {
 				throw new Error('Failed to restore artifacts')
 			}
