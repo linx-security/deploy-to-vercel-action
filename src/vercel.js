@@ -78,12 +78,12 @@ const init = () => {
 			if (!PREBUILT_CACHE_KEY) {
 				throw new Error('PREBUILT_CACHE_KEY is required when PREBUILT is set to true')
 			}
-			core.info('Setting up cache...')
+
 			const artifactClient = artifact.create()
 			core.info('Restoring artifacts...')
 			const downloads = await artifactClient.downloadAllArtifacts(PREBUILT_CACHE_KEY)
 
-			if (downloads.failedItems.length > 0) {
+			if (!downloads || downloads.length > 0) {
 				throw new Error('Failed to restore artifacts')
 			}
 
