@@ -1,9 +1,8 @@
 const core = require('@actions/core')
 const artifact = require('@actions/artifact')
-
+const fs = require('fs/promises')
 const got = require('got')
 const { exec, removeSchema } = require('./helpers')
-const { init: initArtifact } = require('./artifact')
 const {
 	VERCEL_TOKEN,
 	PRODUCTION,
@@ -82,11 +81,20 @@ const init = () => {
 			core.info('Setting up cache...')
 			const artifactClient = artifact.create()
 			core.info('Restoring artifacts...')
-			const cacheHit = await artifactClient.downloadAllArtifacts('.vercel')
-			core.info(JSON.stringify(cacheHit))
-			if (!cacheHit) {
-				throw new Error('Cache not found and PREBUILT is set to true')
+			const downloads = await artifactClient.downloadAllArtifacts(PREBUILT_CACHE_KEY)
+
+			if (downloads.failedItems.length > 0) {
+				throw new Error('Failed to restore artifacts')
 			}
+
+			// Create .vercel folder
+			await fs.mkdir(`${ WORKING_DIRECTORY ? `${ WORKING_DIRECTORY }/` : '' }.vercel`)
+
+			const moveTasks = downloads.map(async ({ downloadPath, artifactName }) => {
+				await fs.rename(downloadPath, `${ WORKING_DIRECTORY ? `${ WORKING_DIRECTORY }/` : '' }.vercel/${ artifactName }`)
+			})
+
+			await Promise.all(moveTasks)
 		}
 
 		core.info('Starting deploy with Vercel CLI')

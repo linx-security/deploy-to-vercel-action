@@ -25651,26 +25651,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 6627:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const artifact = __nccwpck_require__(2605)
-
-const init = () => {
-	const client = artifact.create()
-
-
-	return {
-		...client
-	}
-}
-
-module.exports = {
-	init
-}
-
-/***/ }),
-
 /***/ 4570:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -26028,10 +26008,9 @@ module.exports = {
 
 const core = __nccwpck_require__(2186)
 const artifact = __nccwpck_require__(2605)
-
+const fs = __nccwpck_require__(3292)
 const got = __nccwpck_require__(3061)
 const { exec, removeSchema } = __nccwpck_require__(8505)
-const { init: initArtifact } = __nccwpck_require__(6627)
 const {
 	VERCEL_TOKEN,
 	PRODUCTION,
@@ -26110,11 +26089,20 @@ const init = () => {
 			core.info('Setting up cache...')
 			const artifactClient = artifact.create()
 			core.info('Restoring artifacts...')
-			const cacheHit = await artifactClient.downloadAllArtifacts('.vercel')
-			core.info(JSON.stringify(cacheHit))
-			if (!cacheHit) {
-				throw new Error('Cache not found and PREBUILT is set to true')
+			const downloads = await artifactClient.downloadAllArtifacts(PREBUILT_CACHE_KEY)
+
+			if (downloads.failedItems.length > 0) {
+				throw new Error('Failed to restore artifacts')
 			}
+
+			// Create .vercel folder
+			await fs.mkdir(`${ WORKING_DIRECTORY ? `${ WORKING_DIRECTORY }/` : '' }.vercel`)
+
+			const moveTasks = downloads.map(async ({ downloadPath, artifactName }) => {
+				await fs.rename(downloadPath, `${ WORKING_DIRECTORY ? `${ WORKING_DIRECTORY }/` : '' }.vercel/${ artifactName }`)
+			})
+
+			await Promise.all(moveTasks)
 		}
 
 		core.info('Starting deploy with Vercel CLI')
@@ -26228,6 +26216,14 @@ module.exports = require("events");
 
 "use strict";
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 3292:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs/promises");
 
 /***/ }),
 
