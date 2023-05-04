@@ -1,7 +1,7 @@
 const core = require('@actions/core')
 const got = require('got')
 const { exec, removeSchema } = require('./helpers')
-
+const { init: initCache } = require('./cache')
 const {
 	VERCEL_TOKEN,
 	PRODUCTION,
@@ -16,7 +16,8 @@ const {
 	BUILD_ENV,
 	PREBUILT,
 	WORKING_DIRECTORY,
-	FORCE
+	FORCE,
+	PREBUILT_CACHE_KEY
 } = require('./config')
 
 const init = () => {
@@ -25,6 +26,8 @@ const init = () => {
 	core.exportVariable('VERCEL_PROJECT_ID', VERCEL_PROJECT_ID)
 
 	let deploymentUrl
+	let cache
+
 
 	const deploy = async (commit) => {
 		let commandArguments = [ `--token=${ VERCEL_TOKEN }` ]
@@ -38,6 +41,7 @@ const init = () => {
 		}
 
 		if (PREBUILT) {
+
 			commandArguments.push('--prebuilt')
 		}
 
@@ -68,6 +72,15 @@ const init = () => {
 			BUILD_ENV.forEach((item) => {
 				commandArguments = commandArguments.concat([ '--build-env', item ])
 			})
+		}
+
+		if (PREBUILT) {
+			if (!PREBUILT_CACHE_KEY) {
+				throw new Error('PREBUILT_CACHE_KEY is required when PREBUILT is set to true')
+			}
+			core.info('Setting up cache...')
+			cache = initCache()
+			await cache.restore([ WORKING_DIRECTORY ], PREBUILT_CACHE_KEY)
 		}
 
 		core.info('Starting deploy with Vercel CLI')

@@ -27,6 +27,10 @@ inputs:
     description: |
       Deploy a prebuilt Vercel Project (default: false).
     required: false
+  PREBUILT_CACHE_KEY:
+    description: |
+      Cache key for prebuilt Vercel Project (default: ''), without suppling the input the prebuilt option will fail.
+    required: false
   GITHUB_DEPLOYMENT:
     description: |
       Create a deployment on GitHub (default: true).
