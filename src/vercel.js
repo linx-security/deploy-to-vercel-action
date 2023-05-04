@@ -1,7 +1,7 @@
 const core = require('@actions/core')
 const got = require('got')
 const { exec, removeSchema } = require('./helpers')
-const { init: initCache } = require('./cache')
+const { init: initArtifact } = require('./artifact')
 const {
 	VERCEL_TOKEN,
 	PRODUCTION,
@@ -26,7 +26,7 @@ const init = () => {
 	core.exportVariable('VERCEL_PROJECT_ID', VERCEL_PROJECT_ID)
 
 	let deploymentUrl
-	let cache
+	let artifact
 
 
 	const deploy = async (commit) => {
@@ -79,9 +79,10 @@ const init = () => {
 				throw new Error('PREBUILT_CACHE_KEY is required when PREBUILT is set to true')
 			}
 			core.info('Setting up cache...')
-			cache = initCache()
+			artifact = initArtifact()
 			core.info('Restoring cache...')
-			const cacheHit = await cache.restore([ process.cwd() ], PREBUILT_CACHE_KEY)
+			const cacheHit = await artifact.downloadAllArtifacts(PREBUILT_CACHE_KEY);
+			core.info(JSON.stringify(cacheHit))
 			if (!cacheHit) {
 				throw new Error('Cache not found and PREBUILT is set to true')
 			}
