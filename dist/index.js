@@ -26027,6 +26027,8 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(2186)
+const artifact = __nccwpck_require__(2605)
+
 const got = __nccwpck_require__(3061)
 const { exec, removeSchema } = __nccwpck_require__(8505)
 const { init: initArtifact } = __nccwpck_require__(6627)
@@ -26054,7 +26056,6 @@ const init = () => {
 	core.exportVariable('VERCEL_PROJECT_ID', VERCEL_PROJECT_ID)
 
 	let deploymentUrl
-	let artifact
 
 
 	const deploy = async (commit) => {
@@ -26107,9 +26108,9 @@ const init = () => {
 				throw new Error('PREBUILT_CACHE_KEY is required when PREBUILT is set to true')
 			}
 			core.info('Setting up cache...')
-			artifact = initArtifact()
-			core.info('Restoring cache...')
-			const cacheHit = await artifact.downloadAllArtifacts(PREBUILT_CACHE_KEY);
+			const artifactClient = artifact.create()
+			core.info('Restoring artifacts...')
+			const cacheHit = await artifactClient.downloadAllArtifacts(PREBUILT_CACHE_KEY)
 			core.info(JSON.stringify(cacheHit))
 			if (!cacheHit) {
 				throw new Error('Cache not found and PREBUILT is set to true')
