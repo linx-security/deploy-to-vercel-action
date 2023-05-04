@@ -70111,12 +70111,11 @@ const init = () => {
 	}
 
 	const restore = async (paths, key, restoreKeys) => {
-		const cacheKey = await cache.restoreCache(paths, key, restoreKeys)
-		return cacheKey
+		return await cache.restoreCache(paths, key, restoreKeys)
 	}
 
 	const save = async (paths, key) => {
-		await cache.saveCache(paths, key)
+		return await cache.saveCache(paths, key)
 	}
 
 	return {
@@ -70568,7 +70567,11 @@ const init = () => {
 			}
 			core.info('Setting up cache...')
 			cache = initCache()
-			await cache.restore([ WORKING_DIRECTORY ], PREBUILT_CACHE_KEY)
+			core.info('Restoring cache...')
+			const cacheHit = await cache.restore([ process.cwd() ], PREBUILT_CACHE_KEY)
+			if (!cacheHit) {
+				throw new Error('Cache not found and PREBUILT is set to true')
+			}
 		}
 
 		core.info('Starting deploy with Vercel CLI')

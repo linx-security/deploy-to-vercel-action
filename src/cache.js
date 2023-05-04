@@ -6,12 +6,11 @@ const init = () => {
 	}
 
 	const restore = async (paths, key, restoreKeys) => {
-		const cacheKey = await cache.restoreCache(paths, key, restoreKeys)
-		return cacheKey
+		return await cache.restoreCache(paths, key, restoreKeys)
 	}
 
 	const save = async (paths, key) => {
-		await cache.saveCache(paths, key)
+		return await cache.saveCache(paths, key)
 	}
 
 	return {
