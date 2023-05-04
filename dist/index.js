@@ -26110,7 +26110,7 @@ const init = () => {
 			core.info('Setting up cache...')
 			const artifactClient = artifact.create()
 			core.info('Restoring artifacts...')
-			const cacheHit = await artifactClient.downloadAllArtifacts(PREBUILT_CACHE_KEY)
+			const cacheHit = await artifactClient.downloadAllArtifacts('.vercel')
 			core.info(JSON.stringify(cacheHit))
 			if (!cacheHit) {
 				throw new Error('Cache not found and PREBUILT is set to true')
