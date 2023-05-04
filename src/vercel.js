@@ -81,20 +81,13 @@ const init = () => {
 
 			const artifactClient = artifact.create()
 			core.info('Restoring artifacts...')
-			const downloads = await artifactClient.downloadAllArtifacts(PREBUILT_CACHE_KEY)
-			core.info(JSON.stringify(downloads || {}))
-			if (!downloads || downloads.length > 0) {
-				throw new Error('Failed to restore artifacts')
+			const response = await artifactClient.downloadArtifact(PREBUILT_CACHE_KEY, '.vercel')
+			core.debug(`Artifact download response: ${ JSON.stringify(response) }`)
+
+			if (!response) {
+				throw new Error('Could not restore artifact')
 			}
 
-			// Create .vercel folder
-			await fs.mkdir(`${ WORKING_DIRECTORY ? `${ WORKING_DIRECTORY }/` : '' }.vercel`)
-
-			const moveTasks = downloads.map(async ({ downloadPath, artifactName }) => {
-				await fs.rename(downloadPath, `${ WORKING_DIRECTORY ? `${ WORKING_DIRECTORY }/` : '' }.vercel/${ artifactName }`)
-			})
-
-			await Promise.all(moveTasks)
 		}
 
 		core.info('Starting deploy with Vercel CLI')
