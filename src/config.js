@@ -93,6 +93,10 @@ const context = {
 		type: 'boolean',
 		default: false
 	}),
+	PREBUILT_CACHE_KEY: parser.getInput({
+		key: 'PREBUILT_CACHE_KEY',
+		type: 'string'
+	}),
 	RUNNING_LOCAL: process.env.RUNNING_LOCAL === 'true',
 	FORCE: parser.getInput({
 		key: 'FORCE',

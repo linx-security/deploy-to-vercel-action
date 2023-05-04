@@ -1,7 +1,8 @@
 const core = require('@actions/core')
+const artifact = require('@actions/artifact')
+const fs = require('fs/promises')
 const got = require('got')
 const { exec, removeSchema } = require('./helpers')
-
 const {
 	VERCEL_TOKEN,
 	PRODUCTION,
@@ -16,7 +17,8 @@ const {
 	BUILD_ENV,
 	PREBUILT,
 	WORKING_DIRECTORY,
-	FORCE
+	FORCE,
+	PREBUILT_CACHE_KEY
 } = require('./config')
 
 const init = () => {
@@ -25,6 +27,7 @@ const init = () => {
 	core.exportVariable('VERCEL_PROJECT_ID', VERCEL_PROJECT_ID)
 
 	let deploymentUrl
+
 
 	const deploy = async (commit) => {
 		let commandArguments = [ `--token=${ VERCEL_TOKEN }` ]
@@ -38,6 +41,7 @@ const init = () => {
 		}
 
 		if (PREBUILT) {
+
 			commandArguments.push('--prebuilt')
 		}
 
@@ -68,6 +72,22 @@ const init = () => {
 			BUILD_ENV.forEach((item) => {
 				commandArguments = commandArguments.concat([ '--build-env', item ])
 			})
+		}
+
+		if (PREBUILT) {
+			if (!PREBUILT_CACHE_KEY) {
+				throw new Error('PREBUILT_CACHE_KEY is required when PREBUILT is set to true')
+			}
+
+			const artifactClient = artifact.create()
+			core.info('Restoring artifacts...')
+			const response = await artifactClient.downloadArtifact(PREBUILT_CACHE_KEY, '.vercel')
+			core.debug(`Artifact download response: ${ JSON.stringify(response) }`)
+
+			if (!response) {
+				throw new Error('Could not restore artifact')
+			}
+
 		}
 
 		core.info('Starting deploy with Vercel CLI')

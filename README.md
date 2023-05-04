@@ -96,6 +96,8 @@ Here are all the inputs [deploy-to-vercel-action](https://github.com/BetaHuhn/de
 | `WORKING_DIRECTORY` | Working directory for the Vercel CLI | **No** | N/A |
 | `FORCE` | Used to skip the build cache. | **No** | false
 | `PREBUILT` | Deploy a prebuilt Vercel Project. | **No** | false
+| `PREBUILT_CACHE_KEY` | Cache key for prebuilt Vercel Project (default: ''), without suppling the input the prebuilt option will fail.
+ | **No** | false
 
 ## 🛠️ Configuration
 
